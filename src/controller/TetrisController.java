@@ -38,21 +38,28 @@ public class TetrisController implements ActionListener, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT -> state.moveLeft();
+            case KeyEvent.VK_LEFT  -> state.moveLeft();
             case KeyEvent.VK_RIGHT -> state.moveRight();
-            case KeyEvent.VK_P -> {
-                timer.togglePause();
-                if (state.isPaused()) {
-                    timer.stop();
-                    audio.pauseGameplay();
-                } else {
-                    timer.start();
-                    audio.resumeGameplay();
-                }
+            case KeyEvent.VK_DOWN  -> {
+                timer.setDelay(GameState.DROP_MS_FAST);
+                state.softDropOnce();
             }
-            target.repaint();
-            checkEndAudio();
+            case KeyEvent.VK_UP    -> state.rotateCW();
+            case KeyEvent.VK_SPACE -> state.hardDrop();
+            case KeyEvent.VK_P     -> {
+                state.togglePause();
+                if (state.isPaused()) { timer.stop(); audio.pauseGameplay(); }
+                else { timer.start(); audio.resumeGameplay(); }
+            }
+            case KeyEvent.VK_R     -> {
+                state.reset();
+                timer.setDelay(state.getDropDelay());
+                if (!state.isPaused()) timer.start();
+                audio.startGameplayLoop();
+            }
         }
+        target.repaint();
+        checkEndAudio();
     }
 
     @Override
