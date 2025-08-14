@@ -1,118 +1,105 @@
 package model;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 public enum Tetromino {
-    I(new int[][][]{
-            { {0,0,0,0},
-                    {1,1,1,1},
-                    {0,0,0,0},
-                    {0,0,0,0} },
-            { {0,0,1,0},
-                    {0,0,1,0},
-                    {0,0,1,0},
-                    {0,0,1,0} },
-            { {0,0,0,0},
-                    {1,1,1,1},
-                    {0,0,0,0},
-                    {0,0,0,0} },
-            { {0,0,1,0},
-                    {0,0,1,0},
-                    {0,0,1,0},
-                    {0,0,1,0} }
+    I(new String[]{
+            "....",
+            "1111",
+            "....",
+            "...."
     }, new Color(0, 240, 240)),
-
-    J(new int[][][]{
-            { {1,0,0},
-                    {1,1,1},
-                    {0,0,0} },
-            { {0,1,1},
-                    {0,1,0},
-                    {0,1,0} },
-            { {0,0,0},
-                    {1,1,1},
-                    {0,0,1} },
-            { {0,1,0},
-                    {0,1,0},
-                    {1,1,0} }
+    J(new String[]{
+            "1..",
+            "111",
+            "..."
     }, new Color(0, 0, 255)),
-
-    L(new int[][][]{
-            { {0,0,1},
-                    {1,1,1},
-                    {0,0,0} },
-            { {0,1,0},
-                    {0,1,0},
-                    {0,1,1} },
-            { {0,0,0},
-                    {1,1,1},
-                    {1,0,0} },
-            { {1,1,0},
-                    {0,1,0},
-                    {0,1,0} }
+    L(new String[]{
+            "..1",
+            "111",
+            "..."
     }, new Color(255, 165, 0)),
-
-    O(new int[][][]{
-            { {1,1},
-                    {1,1} },
-            { {1,1},
-                    {1,1} },
-            { {1,1},
-                    {1,1} },
-            { {1,1},
-                    {1,1} }
+    O(new String[]{
+            "11",
+            "11"
     }, new Color(255, 255, 0)),
-
-    S(new int[][][]{
-            { {0,1,1},
-                    {1,1,0},
-                    {0,0,0} },
-            { {0,1,0},
-                    {0,1,1},
-                    {0,0,1} },
-            { {0,0,0},
-                    {0,1,1},
-                    {1,1,0} },
-            { {1,0,0},
-                    {1,1,0},
-                    {0,1,0} }
+    S(new String[]{
+            ".11",
+            "11.",
+            "..."
     }, new Color(0, 255, 0)),
-
-    T(new int[][][]{
-            { {0,1,0},
-                    {1,1,1},
-                    {0,0,0} },
-            { {0,1,0},
-                    {0,1,1},
-                    {0,1,0} },
-            { {0,0,0},
-                    {1,1,1},
-                    {0,1,0} },
-            { {0,1,0},
-                    {1,1,0},
-                    {0,1,0} }
+    T(new String[]{
+            ".1.",
+            "111",
+            "..."
     }, new Color(160, 0, 240)),
-
-    Z(new int[][][]{
-            { {1,1,0},
-                    {0,1,1},
-                    {0,0,0} },
-            { {0,0,1},
-                    {0,1,1},
-                    {0,1,0} },
-            { {0,0,0},
-                    {1,1,0},
-                    {0,1,1} },
-            { {0,1,0},
-                    {1,1,0},
-                    {1,0,0} }
+    Z(new String[]{
+            "11.",
+            ".11",
+            "..."
     }, new Color(255, 0, 0));
 
     public final int[][][] rotations; // [rot][r][c]
     public final Color color;
 
-    Tetromino(int[][][] rotations, Color color) {
-        this.rotations = rotations;
+    Tetromino(String[] base, Color color) {
+        this.rotations = buildRotations(parse(base));
         this.color = color;
     }
+
+    /* helpers */
+    private static int[][] parse(String[] rows) {
+        int h = rows.length, w = 0;
+        for (String r : rows) w = Math.max(w, r.length());
+        int[][] m = new int[h][w];
+        for (int r = 0; r < h; r++) {
+            for (int c = 0; c < rows[r].length(); c++) {
+                m[r][c] = rows[r].charAt(c) == '1' ? 1 : 0;
+            }
+        }
+        return trim(m);
+    }
+
+    private static int[][][] buildRotations(int[][] base) {
+        int[][][] out = new int[4][][];
+        int[][] cur = base;
+        for (int i = 0; i < 4; i++) {
+            out[i] = trim(cur);
+            cur = rotCW(cur);
+        }
+        return out;
+    }
+
+    private static int[][] rotCW(int[][] m) {
+        int h = m.length, w = m[0].length;
+        int[][] r = new int[w][h];
+        for (int i = 0; i < h; i++)
+            for (int j = 0; j < w; j++)
+                r[j][h - 1 - i] = m[i][j];
+        return r;
+    }
+
+    private static int[][] trim(int[][] m) {
+        int h = m.length, w = m[0].length;
+        List<Integer> rs = new ArrayList<>(), cs = new ArrayList<>();
+        for (int r = 0; r < h; r++) {
+            boolean any = false;
+            for (int c = 0; c < w; c++) if (m[r][c] != 0) { any = true; break; }
+            if (any) rs.add(r);
+        }
+        for (int c = 0; c < w; c++) {
+            boolean any = false;
+            for (int r = 0; r < h; r++) if (m[r][c] != 0) { any = true; break; }
+            if (any) cs.add(c);
+        }
+        if (rs.isEmpty() || cs.isEmpty()) return new int[][]{{0}};
+        int[][] out = new int[rs.size()][cs.size()];
+        for (int i = 0; i < rs.size(); i++)
+            for (int j = 0; j < cs.size(); j++)
+                out[i][j] = m[rs.get(i)][cs.get(j)];
+        return out;
+    }
 }
+

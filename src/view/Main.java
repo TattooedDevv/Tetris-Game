@@ -10,14 +10,15 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Tetris");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600,900);
+
+            TetrisPanel board = new TetrisPanel();
+            frame.setContentPane(board);
+            frame.pack();
             frame.setResizable(false);
-
-            TetrisBoard board = new  TetrisBoard();
-            frame.add(board);
-
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
+            board.requestFocusInWindow();
+
         });
     }
 
