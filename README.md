@@ -1,2 +1,2 @@
 # Tetris-Game
-A simple Tetris game that I will code in Java
+This was a final project in my Java class in my junior year of college
