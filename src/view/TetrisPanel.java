@@ -17,7 +17,6 @@ public class TetrisPanel extends JPanel {
     private final GameState state;
     private final String playerName;
 
-
     /**
      * Construct a panel with a given game state and player name and sets background color and preferred size
      * @param state
