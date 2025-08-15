@@ -9,20 +9,23 @@ import java.awt.*;
 public class TetrisPanel extends JPanel {
 
 
-    private static final int TILE_SIZE = 32;
-    private static final int INFO_HEIGHT = 40;
+    private static final int TILE_SIZE = 60;
+    private static final int INFO_HEIGHT = 70;
 
     private final GameState state;
     private final String playerName;
 
 
-    public TetrisPanel() {
+    public TetrisPanel(GameState state, String playerName) {
         this.state = state;
         this.playerName = playerName;
         setBackground(Color.BLACK);
-        setPreferredSize(new Dimension(GameState.COLUMNS * TILE_SIZE, INFO_HEIGHT +
-                GameState.ROWS * TILE_SIZE));
+        setPreferredSize(new Dimension(
+                GameState.COLUMNS * TILE_SIZE,
+                INFO_HEIGHT + GameState.ROWS * TILE_SIZE
+        ));
     }
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -33,6 +36,7 @@ public class TetrisPanel extends JPanel {
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
 
+        // HUD
         g.setColor(Color.WHITE);
         g.drawString("Player: " + playerName, 10, 18);
         g.drawString("Score: " + state.getScore(), 160, 18);
@@ -42,9 +46,11 @@ public class TetrisPanel extends JPanel {
         if (state.isGameOver())
             g.drawString(state.isWin() ? "[YOU WIN]" : "[GAME OVER] Press R", 430, 18);
 
+        // Playfield background
         g.setColor(new Color(20, 20, 20));
         g.fillRect(0, INFO_HEIGHT, GameState.COLUMNS * TILE_SIZE, GameState.ROWS * TILE_SIZE);
 
+        // Grid
         g.setColor(new Color(45, 45, 45));
         for (int r = 0; r <= GameState.ROWS; r++)
             g.drawLine(0, INFO_HEIGHT + r * TILE_SIZE,
@@ -53,6 +59,7 @@ public class TetrisPanel extends JPanel {
             g.drawLine(c * TILE_SIZE, INFO_HEIGHT,
                     c * TILE_SIZE, INFO_HEIGHT + GameState.ROWS * TILE_SIZE);
 
+        // Locked tiles already on the board
         int[][] board = state.getBoard();
         var palette = state.getPalette();
         for (int r = 0; r < GameState.ROWS; r++) {
@@ -62,19 +69,24 @@ public class TetrisPanel extends JPanel {
             }
         }
 
-        if (!state.isGameOver()) {
-            Piece cur = state.getCurrent();
+        // ✅ Draw the current falling piece (null-safe + uses getter for color)
+        model.Piece cur = state.getCurrent();
+        if (cur != null && !state.isGameOver()) {
             int[][] s = cur.shape();
             for (int r = 0; r < s.length; r++) {
                 for (int c = 0; c < s[0].length; c++) {
                     if (s[r][c] == 0) continue;
                     int br = cur.row + r, bc = cur.col + c;
-                    if (br >= 0) drawTile(g, bc, br, cur.type.color);
+                    if (br >= 0) drawTile(g, bc, br, cur.type.getColor());
                 }
             }
         }
+
+        // Next-piece preview (has its own small guard)
         drawNextPreview(g);
     }
+
+
 
     private void drawTile(Graphics g, int col, int row, Color color) {
         int x = col * TILE_SIZE;
@@ -97,6 +109,8 @@ public class TetrisPanel extends JPanel {
         g.drawString("Next:", GameState.COLUMNS * TILE_SIZE - 70, 18);
 
         Piece next = state.getNext();
+        if (next == null) return; // guard
+
         int[][] s = next.shape();
         int baseX = (GameState.COLUMNS * TILE_SIZE) - 70;
         int baseY = 28;
@@ -105,7 +119,7 @@ public class TetrisPanel extends JPanel {
                 if (s[r][c] == 0) continue;
                 int x = baseX + c * (TILE_SIZE / 2);
                 int y = baseY + r * (TILE_SIZE / 2);
-                g.setColor(next.type.color);
+                g.setColor(next.type.getColor());
                 g.fillRect(x, y, TILE_SIZE / 2 - 2, TILE_SIZE / 2 - 2);
             }
         }
