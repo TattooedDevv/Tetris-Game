@@ -29,7 +29,7 @@ public class TetrisController implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        state.setGravity();
+        state.stepGravity();
         timer.setDelay(state.getDropDelay());
         target.repaint();
         checkEndAudio();

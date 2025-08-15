@@ -2,18 +2,19 @@ package model;
 
 import java.awt.Color;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class GameState {
     public static final int ROWS = 20;
     public static final int COLUMNS = 10;
 
     public static final int DROP_MS_START = 550;
-    public static final int DOP_MS_FAST = 50;
+    public static final int DROP_MS_FAST = 50;
 
     public static final int WIN_LINES = 40;
 
     private final int[][] board = new int[ROWS][COLUMNS];
-    private final Color[] palette = new Color[Tetromino.values().length];
+    private final Color[] palette = new Color[7];
 
     private final Random rng = new Random();
     private Piece cur;
@@ -28,15 +29,25 @@ public class GameState {
     private int level = 1;
     private int dropDelay = DROP_MS_START;
 
+    private static final Supplier<BaseTetromino>[] FACTORY = new Supplier[]{
+            IShape::new, JShape::new, LShape::new, OShape::new, SShape::new, TShape::new, ZShape::new
+    };
+
     public GameState() {
         for (int r = 0; r < ROWS; r++)
             for (int c = 0; c < COLUMNS; c++)
                 board[r][c] = -1;
-        Tetromino[] types = Tetromino.values();
-        for (int i = 0; i < types.length; i++) palette[i] = types[i].color;
+
+        palette[0] = new Color(0, 240, 240);
+        palette[1] = new Color(0, 0, 255);
+        palette[2] = new Color(255, 165, 0);
+        palette[3] = new Color(255, 255, 0);
+        palette[4] = new Color(0, 255, 0);
+        palette[5] = new Color(160, 0, 240);
+        palette[6] = new Color(255, 0, 0);
+
         reset();
     }
-
 
     public void reset() {
         for (int r = 0; r < ROWS; r++)
@@ -142,11 +153,27 @@ public class GameState {
     }
 
     private Piece randomPiece() {
-        Tetromino t = Tetromino.values()[rng.nextInt(Tetromino.values().length)];
+        BaseTetromino t = FACTORY[rng.nextInt(FACTORY.length)].get();
         int rot = 0;
-        int spawnCol = (COLUMNS - t.rotations[0][0].length) / 2;
-        return new Piece(t,rot,0,spawnCol);
+        int spawnCol = (COLUMNS - t.getRotations()[0][0].length) / 2;
+        return new Piece(t, rot, 0, spawnCol);
     }
+
+    private boolean collides(Piece p, int newRow, int newCol, int newRot) {
+        int[][] s = p.type.getRotations()[newRot];
+        int h = s.length, w = s[0].length;
+        for (int r = 0; r < h; r++) {
+            for (int c = 0; c < w; c++) {
+                if (s[r][c] == 0) continue;
+                int br = newRow + r, bc = newCol + c;
+                if (bc < 0 || bc >= COLUMNS || br >= ROWS) return true;
+                if (br < 0) continue;
+                if (board[br][bc] != -1) return true;
+            }
+        }
+        return false;
+    }
+
 
     private boolean tryMove(int nr, int nc, int rot, boolean lockIfBlocked) {
         if (!collides(cur, nr, nc, rot)) {
@@ -154,14 +181,14 @@ public class GameState {
             cur.col = nc;
             cur.rot = rot;
             return  true;
-        }     else if (!lockIfBlocked && nr == cr.row + 1 && nc == cur.col) {
+        }     else if (lockIfBlocked && nr == cur.row + 1 && nc == cur.col) {
             lockPiece();
         }
         return false;
     }
 
     private void lockPiece() {
-        int idx = cur.type.ordinal();
+        int idx = cur.type.getIndex();
         int[][] s = cur.shape();
         for (int r = 0; r < s.length; r++) {
             for (int c = 0; c < s[0].length; c++) {
