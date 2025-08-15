@@ -248,7 +248,7 @@ public class GameState {
                 if (br >= 0 && br < ROWS && bc >= 0 && bc < COLUMNS) {
                     board[br][bc] = idx;
                 } else {
-                    gameOver = true; // locked out of bounds
+                    gameOver = true;
                 }
             }
         }

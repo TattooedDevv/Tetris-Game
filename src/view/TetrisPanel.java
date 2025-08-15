@@ -119,7 +119,7 @@ public class TetrisPanel extends JPanel {
         g.drawString("Next:", GameState.COLUMNS * TILE_SIZE - 70, 18);
 
         Piece next = state.getNext();
-        if (next == null) return; // guard
+        if (next == null) return;
 
         int[][] s = next.shape();
         int baseX = (GameState.COLUMNS * TILE_SIZE) - 70;
