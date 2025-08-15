@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.util.Random;
 import java.util.function.Supplier;
 
+/**
+ *  Core model for the Tetris game.
+ */
 public class GameState {
     public static final int ROWS = 20;
     public static final int COLUMNS = 10;
@@ -33,6 +36,9 @@ public class GameState {
             IShape::new, JShape::new, LShape::new, OShape::new, SShape::new, TShape::new, ZShape::new
     };
 
+    /**
+     * Initialize board, palette, and start a new game.
+     */
     public GameState() {
         for (int r = 0; r < ROWS; r++)
             for (int c = 0; c < COLUMNS; c++)
@@ -49,6 +55,9 @@ public class GameState {
         reset();
     }
 
+    /**
+     * Reset game state to starting values.
+     */
     public void reset() {
         for (int r = 0; r < ROWS; r++)
             for (int c = 0; c < COLUMNS; c++)
@@ -67,18 +76,28 @@ public class GameState {
         }
     }
 
+    /**
+     * This adds 1 gravity tick
+     * @return
+     */
     public boolean stepGravity() {
         if (paused || gameOver)
             return false;
         return tryMove(cur.row + 1, cur.col, cur.rot, true);
     }
 
+    /**
+     * Instandly drops the peice
+     */
     public void hardDrop() {
         if (paused || gameOver) return;
         while (!collides(cur, cur.row + 1, cur.col, cur.rot)) cur.row++;
         lockPiece();
     }
 
+    /**
+     * Handles the moment, left, right soft drop
+     */
         public void moveLeft() {
         if (!paused && !gameOver)
             tryMove(cur.row, cur.col - 1, cur.rot, false);
@@ -92,6 +111,9 @@ public class GameState {
             tryMove(cur.row + 1, cur.col, cur.rot, true);
     }
 
+    /**
+     * Rotate piece clockwise
+     */
     public void rotateCW() {
         if (paused || gameOver) return;
         int nr = (cur.rot + 1) % 4;
@@ -105,11 +127,18 @@ public class GameState {
         }
     }
 
+    /**
+     * toggle pause
+     */
     public void togglePause() {
         if (!gameOver)
             paused = !paused;
     }
 
+    /**
+     * Getters
+     * @return
+     */
     public int[][] getBoard() {
         return board;
     }
@@ -152,6 +181,10 @@ public class GameState {
         return dropDelay;
     }
 
+    /**
+     * This picks a new random tetromino
+     * @return
+     */
     private Piece randomPiece() {
         BaseTetromino t = FACTORY[rng.nextInt(FACTORY.length)].get();
         int rot = 0;
@@ -159,6 +192,14 @@ public class GameState {
         return new Piece(t, rot, 0, spawnCol);
     }
 
+    /**
+     * Check if a piece at a given row,col,rot collides with board boundaries or filled cell
+     * @param p
+     * @param newRow
+     * @param newCol
+     * @param newRot
+     * @return
+     */
     private boolean collides(Piece p, int newRow, int newCol, int newRot) {
         int[][] s = p.type.getRotations()[newRot];
         int h = s.length, w = s[0].length;
@@ -174,7 +215,14 @@ public class GameState {
         return false;
     }
 
-
+    /**
+     * Attempt to move current piece, If free, updates row/col/rot, If blocked and falling, locks the piece.
+     * @param nr
+     * @param nc
+     * @param rot
+     * @param lockIfBlocked
+     * @return
+     */
     private boolean tryMove(int nr, int nc, int rot, boolean lockIfBlocked) {
         if (!collides(cur, nr, nc, rot)) {
             cur.row = nr;
@@ -187,6 +235,9 @@ public class GameState {
         return false;
     }
 
+    /**
+     *  Lock current piece onto the board, clear lines, update score, then spawn next piece
+     */
     private void lockPiece() {
         int idx = cur.type.getIndex();
         int[][] s = cur.shape();
@@ -206,6 +257,9 @@ public class GameState {
         if (!gameOver) spawnNext();
     }
 
+    /**
+     * Replace current piece with next and gives a new preview.
+     */
     private void spawnNext() {
         cur = next;
         next = randomPiece();
@@ -213,6 +267,10 @@ public class GameState {
             gameOver = true;
     }
 
+    /**
+     * Scan board for full lines, clear them, shift above rows down, and update win condition
+     * @return
+     */
     private int clearLines() {
         int cleared = 0;
         for (int r = ROWS -1 ; r >= 0; r--) {
@@ -233,6 +291,10 @@ public class GameState {
         return cleared;
     }
 
+    /**
+     * Add points for cleared lines, adjust level and drop speed
+     * @param cleared
+     */
     private void updateScore(int cleared) {
         int add = switch (cleared) {
             case 1 -> 100;

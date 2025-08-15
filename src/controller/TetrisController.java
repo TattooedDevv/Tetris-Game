@@ -5,6 +5,10 @@ import util.AudioManager;
 
 import javax.swing.*;
 import java.awt.event.*;
+
+/**
+ * @ Overall handles keyboard input, game timing, repainting and audio
+ */
 public class TetrisController implements ActionListener, KeyListener {
 
     private final GameState state;
@@ -17,6 +21,9 @@ public class TetrisController implements ActionListener, KeyListener {
         this.target = repaintTarget;
         this.audio = audio;
 
+        /**
+         * Starts gravity at the models dop delay
+         */
         this.timer = new Timer(state.getDropDelay(), this);
         this.timer.start();
 
@@ -27,6 +34,11 @@ public class TetrisController implements ActionListener, KeyListener {
         audio.startGameplayLoop();
     }
 
+    /**
+     *
+     * @param e the event to be processed.
+     * advance gravity, resync delay, repaint, and check end audio.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         state.stepGravity();
@@ -35,6 +47,10 @@ public class TetrisController implements ActionListener, KeyListener {
         checkEndAudio();
     }
 
+    /**
+     *
+     * @param e the event to be processed. Maps the key action example left, right, pause restart etc
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
@@ -62,6 +78,10 @@ public class TetrisController implements ActionListener, KeyListener {
         checkEndAudio();
     }
 
+    /**
+     * Handles when DOWN is release it'll do back to normal speed
+     * @param e the event to be processed
+     */
     @Override
     public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DOWN)
@@ -70,6 +90,9 @@ public class TetrisController implements ActionListener, KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {}
 
+    /**
+     * If the game is over the timer will stop and play the win or lose audio
+     */
     private void checkEndAudio() {
         if (state.isGameOver()) {
             timer.stop();

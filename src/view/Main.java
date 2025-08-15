@@ -6,8 +6,9 @@ import util.AudioManager;
 import javax.swing.*;
 
 
-/*
-@ Main class to make sure the board appears
+/**
+ * Entry point of the Tetris game.
+ * Creates the game state model, panel view, and controller
  */
 public class Main {
     public static void main(String[] args) {

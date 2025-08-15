@@ -9,14 +9,23 @@ public abstract class BaseTetromino {
     protected final int[][][] rotations;
     protected final Color color;
 
-
+    /**
+     * Peice identifier
+     * @return
+     */
     public abstract int getIndex();
 
 
+    /**
+     * Construct from a string seed
+     * @param seed
+     * @param color
+     */
     protected BaseTetromino(String[] seed, Color color) {
         this.rotations = buildRotations(parse(seed));
         this.color = color;
     }
+
 
     public int[][][] getRotations() { return rotations; }
     public Color getColor() {
@@ -24,6 +33,11 @@ public abstract class BaseTetromino {
     }
 
 
+    /**
+     * Parses a string array seed into 2d matrix and trim empty rows and cols
+     * @param rows
+     * @return
+     */
 
     private static int[][] parse(String[] rows) {
         int h = rows.length, w = 0;
@@ -37,6 +51,11 @@ public abstract class BaseTetromino {
         return trim(m);
     }
 
+    /**
+     * Builds the rotations of 0, 90, 180 and 270 degree from the base
+     * @param base
+     * @return
+     */
     private static int[][][] buildRotations(int[][] base) {
         int[][][] out = new int[4][][];
         int[][] cur = base;
@@ -47,6 +66,11 @@ public abstract class BaseTetromino {
         return out;
     }
 
+    /**
+     * rotates 90 degree clockwise
+     * @param m
+     * @return
+     */
     private static int[][] rotCW(int[][] m) {
         int h = m.length, w = m[0].length;
         int[][] r = new int[w][h];
@@ -56,6 +80,12 @@ public abstract class BaseTetromino {
         return r;
     }
 
+    /**
+     * If its not filled cells remain, returns a 1x1 zero matrix
+     * Trims emptyu rows and columns
+     * @param m
+     * @return
+     */
     private static int[][] trim(int[][] m) {
         int h = m.length, w = m[0].length;
         List<Integer> rs = new ArrayList<>(), cs = new ArrayList<>();

@@ -4,6 +4,9 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Handles background music and sound effects for the Tetris game
+ */
 public class AudioManager {
     private Clip gameplayClip;
     private Clip winClip;
@@ -20,6 +23,12 @@ public class AudioManager {
             gameplayClip.loop(0);
         }
     }
+
+    /**
+     *  Loads a clip from a classpath resource
+     * @param classpath
+     * @return
+     */
     private Clip loadClip(String classpath) {
         try {
             URL url = getClass().getClassLoader().getResource(classpath);
@@ -50,6 +59,9 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Start or restart the continuous gameplay music loop
+     */
     public void startGameplayLoop() {
         if (gameplayClip == null) return;
         stopGameplay();
@@ -59,12 +71,18 @@ public class AudioManager {
         gameplayFramePos = 0;
     }
 
+    /**
+     * pauses game
+     */
     public void pauseGameplay() {
         if (gameplayClip == null) return;
         gameplayFramePos = gameplayClip.getFramePosition();
         gameplayClip.stop();
     }
 
+    /**
+     * resumes game
+     */
     public void resumeGameplay() {
         if (gameplayClip == null) return;
         gameplayClip.setFramePosition(gameplayFramePos);
@@ -72,23 +90,36 @@ public class AudioManager {
         gameplayClip.start();
     }
 
+    /**
+     * stops game
+     */
     public void stopGameplay() {
         if (gameplayClip == null) return;
         gameplayClip.stop();
         gameplayClip.flush();
     }
 
+    /**
+     * plays win music if you win
+     */
     public void playWin(){
         stopGameplay();
         playOnce(winClip);
         }
 
-        public void playLose(){
+    /**
+     * plays lose music if you lose
+     */
+    public void playLose(){
         stopGameplay();
         playOnce(loseClip);
         }
 
-        private void playOnce(Clip clip) {
+    /**
+     * plays the main music from the beginiing
+     * @param clip
+     */
+    private void playOnce(Clip clip) {
         if(clip == null) return;
         clip.stop();
         clip.setFramePosition(0);
